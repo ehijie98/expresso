@@ -1,5 +1,5 @@
 const sqlite3 = require('sqlite3');
-const db = require('./server/db');
+const db = require('./api/db');
 
 db.serialize(() => {
     db.run(`DROP TABLE IF EXISTS Employee`);
