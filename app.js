@@ -11,7 +11,7 @@ app.use(bodyParser.json());
 app.use(cors());
 app.use(morgan('dev'));
 
-app.use('/api', apiRouter)
+app.use('/api', apiRouter);
 
 app.use(errorHandler());
 
