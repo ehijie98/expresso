@@ -47,3 +47,18 @@ employeeRouter.post('/', (req, res, next) => {
         }
     });
 });
+
+employeeRouter.param('employeeId', (req, res, next, employeeId) => {
+    sql = `SELECT * FROM Employee WHERE id = $employeeId`;
+    values = {$employeeId: employeeId};
+    db.get(sql, values, (err, employee) => {
+        if (err) {
+            next(err);
+        } else if (employee) {
+            req.artist = employee;
+            next();
+        } else {
+            res.sendStatus(404);
+        }
+    });
+});
