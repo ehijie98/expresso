@@ -20,7 +20,7 @@ employeeRouter.post('/', (req, res, next) => {
     const name = employee.name;
     const position = employee.position;
     const wage = employee.wage;
-    const is_current_employee = employee.is_current_employee === 0 ? 0 : 1;
+    const isCurrentEmployee = employee.isCurrentEmployee === 0 ? 0 : 1;
 
     if (!employee || !name || !position || !wage) {
         return res.sendStatus(400);
@@ -32,7 +32,7 @@ employeeRouter.post('/', (req, res, next) => {
         $name: name,
         $position: position,
         $wage: wage,
-        $isCurrentEmployee: is_current_employee
+        $isCurrentEmployee: isCurrentEmployee
     };
 
     db.run(sql, values, function(err) {
@@ -65,4 +65,43 @@ employeeRouter.param('employeeId', (req, res, next, employeeId) => {
 
 employeeRouter.get('/:employeeId', (req, res, next) => {
     res.status(200).json({employee: req.employee});
+})
+
+employeeRouter.put('/:employeeId', (req, res, next) => {
+    const employee = req.body.employee;
+    const name = employee.name;
+    const position = employee.position;
+    const wage = employee.wage;
+    const isCurrentEmployee = employee.isCurrentEmployee === 0 ? 0 : 1;
+
+    if (!name || !position || !wage) {
+        return res.sendStatus(400);
+    } else if (!employee) {
+        return res.sendStatus(404);
+    }
+
+    sql = `UPDATE Employee SET name = $name,
+    position = $position,
+    wage = $wage,
+    is_current_employee = $isCurrentEmployee`;
+    values = {
+        $name: name,
+        $position: position,
+        $wage: wage,
+        $isCurrentEmployee: isCurrentEmployee
+    };
+
+    db.run(sql, values, function(err) {
+        if (err) {
+            next(err);
+        }
+        db.get(`SELECT * FROM Employee WHERE id = ${req.params.employeeId}`,
+            (err, employee) => {
+                res.status(200).json({employee: employee});
+            }
+        )
+    })
+
+
+
 })
