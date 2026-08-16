@@ -55,10 +55,14 @@ employeeRouter.param('employeeId', (req, res, next, employeeId) => {
         if (err) {
             next(err);
         } else if (employee) {
-            req.artist = employee;
+            req.employee = employee;
             next();
         } else {
             res.sendStatus(404);
         }
     });
 });
+
+employeeRouter.get('/:employeeId', (req, res, next) => {
+    res.status(200).json({employee: req.employee});
+})
