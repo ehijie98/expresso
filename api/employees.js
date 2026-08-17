@@ -1,6 +1,8 @@
 const express = require('express');
 const employeeRouter = express.Router();
 const db = require('./db');
+const handleDbError = require('./handleDbError');
+
 
 employeeRouter.get('/', (req, res, next) => {
     db.all(`SELECT * FROM Employee WHERE Employee.is_current_employee = 1`, 
@@ -39,13 +41,7 @@ employeeRouter.post('/', (req, res, next) => {
         } else {
             db.get(`SELECT * FROM Employee WHERE id = ${this.lastID}`,
                 (err, employee) => {
-                    if (err) {
-                        next(err);
-                    } else if (!employee) {
-                        res.sendStatus(404);
-                    } else {
-                        res.status(201).json({employee: employee});
-                    }
+                    handleDbError(res, err, employee, next, {key: 'employee', status: 201});
                 }
             );
         }
@@ -101,13 +97,7 @@ employeeRouter.put('/:employeeId', (req, res, next) => {
         }
         db.get(`SELECT * FROM Employee WHERE id = ${req.params.employeeId}`,
             (err, employee) => {
-                if (err) {
-                    next(err);
-                } else if (!employee) {
-                    res.sendStatus(404);
-                } else {
-                           res.status(200).json({employee: employee});
-                }
+                handleDbError(res, err, employee, next, {key: 'employee'});
             }
         );
     });
@@ -123,17 +113,13 @@ employeeRouter.delete('/:employeeId', (req, res, next) => {
         } else {
             db.get(`SELECT * FROM Employee WHERE id = ${req.params.employeeId}`,
                 (err, employee) => {
-                    if (err) {
-                        next(err);
-                    } else if (!employee) {
-                        res.sentStatus(404);
-                    } else {
-                        res.status(200).json({employee: employee});
-                    }
+                    handleDbError(res, err, employee, next, {key: 'employee'});
                 }
             );
         }
     });
 });
+
+
 
 module.exports = employeeRouter;
