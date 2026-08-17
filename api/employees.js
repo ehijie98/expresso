@@ -2,8 +2,6 @@ const express = require('express');
 const employeeRouter = express.Router();
 const db = require('./db');
 
-module.exports = employeeRouter;
-
 employeeRouter.get('/', (req, res, next) => {
     db.all(`SELECT * FROM Employee WHERE Employee.is_current_employee = 1`, 
         (err, employees) => {
@@ -41,7 +39,13 @@ employeeRouter.post('/', (req, res, next) => {
         } else {
             db.get(`SELECT * FROM Employee WHERE id = ${this.lastID}`,
                 (err, employee) => {
-                    res.status(201).json({employee: employee});
+                    if (err) {
+                        next(err);
+                    } else if (!employee) {
+                        res.sendStatus(404);
+                    } else {
+                        res.status(201).json({employee: employee});
+                    }
                 }
             );
         }
@@ -49,8 +53,8 @@ employeeRouter.post('/', (req, res, next) => {
 });
 
 employeeRouter.param('employeeId', (req, res, next, employeeId) => {
-    sql = `SELECT * FROM Employee WHERE id = $employeeId`;
-    values = {$employeeId: employeeId};
+    const sql = `SELECT * FROM Employee WHERE id = $employeeId`;
+    const values = {$employeeId: employeeId};
     db.get(sql, values, (err, employee) => {
         if (err) {
             next(err);
@@ -76,19 +80,19 @@ employeeRouter.put('/:employeeId', (req, res, next) => {
 
     if (!name || !position || !wage) {
         return res.sendStatus(400);
-    } else if (!employee) {
-        return res.sendStatus(404);
     }
 
-    sql = `UPDATE Employee SET name = $name,
+    const sql = `UPDATE Employee SET name = $name,
     position = $position,
     wage = $wage,
-    is_current_employee = $isCurrentEmployee`;
-    values = {
+    is_current_employee = $isCurrentEmployee
+    WHERE id = $employeeId`;
+    const values = {
         $name: name,
         $position: position,
         $wage: wage,
-        $isCurrentEmployee: isCurrentEmployee
+        $isCurrentEmployee: isCurrentEmployee,
+        $employeeId: req.params.employeeId
     };
 
     db.run(sql, values, function(err) {
@@ -97,11 +101,39 @@ employeeRouter.put('/:employeeId', (req, res, next) => {
         }
         db.get(`SELECT * FROM Employee WHERE id = ${req.params.employeeId}`,
             (err, employee) => {
-                res.status(200).json({employee: employee});
+                if (err) {
+                    next(err);
+                } else if (!employee) {
+                    res.sendStatus(404);
+                } else {
+                           res.status(200).json({employee: employee});
+                }
             }
-        )
-    })
+        );
+    });
+});
 
+employeeRouter.delete('/:employeeId', (req, res, next) => {
+    const sql = `UPDATE Employee SET is_current_employee = 0 WHERE id = $employeeId`;
+    const values = {$employeeId: req.params.employeeId};
 
+    db.run(sql, values, function(err) {
+        if (err) {
+            next(err);
+        } else {
+            db.get(`SELECT * FROM Employee WHERE id = ${req.params.employeeId}`,
+                (err, employee) => {
+                    if (err) {
+                        next(err);
+                    } else if (!employee) {
+                        res.sentStatus(404);
+                    } else {
+                        res.status(200).json({employee: employee});
+                    }
+                }
+            );
+        }
+    });
+});
 
-})
+module.exports = employeeRouter;
