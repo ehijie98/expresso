@@ -10,5 +10,4 @@ db.serialize(() => {
         wage INTEGER NOT NULL,
         is_current_employee INTEGER NOT NULL DEFAULT 1
         )`);
-
 })
