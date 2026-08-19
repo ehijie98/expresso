@@ -2,6 +2,8 @@ const sqlite3 = require('sqlite3');
 const db = require('./api/db');
 
 db.serialize(() => {
+    db.run(`PRAGMA foreign_keys = ON`);
+    db.run(`DROP TABLE IF EXISTS Timesheet`);
     db.run(`DROP TABLE IF EXISTS Employee`);
     db.run(`CREATE TABLE IF NOT EXISTS Employee (
         id INTEGER NOT NULL PRIMARY KEY,
@@ -10,4 +12,12 @@ db.serialize(() => {
         wage INTEGER NOT NULL,
         is_current_employee INTEGER NOT NULL DEFAULT 1
         )`);
-})
+    db.run(`CREATE TABLE IF NOT EXISTS Timesheet (
+        id INTEGER NOT NULL PRIMARY KEY,
+        hours INTEGER NOT NULL,
+        rate INTEGER NOT NULL,
+        date INTEGER NOT NULL,
+        employee_id INTEGER NOT NULL,
+        FOREIGN KEY(employee_id) REFERENCES Employee(id)
+        )`);
+});
