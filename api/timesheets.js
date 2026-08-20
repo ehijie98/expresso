@@ -60,4 +60,20 @@ timesheetRouter.post('/', (req, res, next) => {
     });
 });
 
+timesheetRouter.param('timesheetId', (req, res, next, timesheetId) => {
+    const sql = `SELECT * FROM Timesheet WHERE Timesheet.id = $timesheetId`;
+    const values = {$timesheetId: timesheetId};
+
+    db.get(sql, values, (err, timesheet) => {
+        if (err) {
+            next(err);
+        } else if (timesheet) {
+            req.timesheet = timesheet;
+            next();
+        } else {
+            res.sendStatus(404);
+        }
+    });
+})
+
 module.exports = timesheetRouter;
