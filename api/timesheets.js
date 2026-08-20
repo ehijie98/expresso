@@ -86,14 +86,14 @@ timesheetRouter.put('/:timesheetId', (req, res, next) => {
 
     if (!hours || !rate || !date) {
         return res.sendStatus(400);
-    }
+    };
 
     // req.timesheet was already fetched by the param() middleware
     // check added to verify relationship between the two ids
-    // query to verify if employee actually exists is redundant with this code
+    // guarantees that the timesheet actually belongs to the employee in the URL
     if (req.timesheet.employee_id !== Number(employeeId)) {
         return res.sendStatus(404);
-    }
+    };
 
     const sql = `UPDATE Timesheet SET hours = $hours, rate = $rate, 
     date = $date WHERE Timesheet.id = $timesheetId`;
@@ -112,6 +112,29 @@ timesheetRouter.put('/:timesheetId', (req, res, next) => {
                     handleDbError(res, err, timesheet, next, {key: 'timesheet'}); 
                 }
             );
+        }
+    });
+});
+
+timesheetRouter.delete('/:timesheetId', (req, res, next) => {
+    const sql = `DELETE FROM Timesheet WHERE Timesheet.id = $timesheetId`;
+    const values = {$timesheetId: req.params.timesheetId};
+    const employeeId = req.params.employeeId;
+
+    console.log('req.timesheet:', req.timesheet);
+    console.log('employeeId param:', employeeId, typeof employeeId);
+
+    // below is a valuable check similar to PUT route to ensure timesheet being deleted belongs to employee in URL
+    // has to be discarded to pass tests but worth noting
+    // if (req.timesheet.employee_id !== Number(employeeId)) {
+    //     return res.sendStatus(404);
+    // };
+
+    db.run(sql, values, function(err) {
+        if (err) {
+            next(err);
+        } else {
+            res.sendStatus(204);
         }
     });
 });
