@@ -5,6 +5,7 @@ db.serialize(() => {
     db.run(`PRAGMA foreign_keys = ON`);
     db.run(`DROP TABLE IF EXISTS Timesheet`);
     db.run(`DROP TABLE IF EXISTS Employee`);
+    db.run(`DROP TABLE IF EXISTS Menu`);
     db.run(`CREATE TABLE IF NOT EXISTS Employee (
         id INTEGER NOT NULL PRIMARY KEY,
         name TEXT NOT NULL,
@@ -20,4 +21,8 @@ db.serialize(() => {
         employee_id INTEGER NOT NULL,
         FOREIGN KEY(employee_id) REFERENCES Employee(id)
         )`);
+    db.run(`CREATE TABLE IF NOT EXISTS Menu (
+        id INTEGER NOT NULL PRIMARY KEY,
+        title TEXT NOT NULL
+    )`);
 });
