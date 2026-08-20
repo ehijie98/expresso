@@ -29,6 +29,7 @@ timesheetRouter.post('/', (req, res, next) => {
         return res.sendStatus(400);
     };
 
+
     db.get(employeeSql, employeeValues, (err, employee) => {
         if (err) {
             next(err);
@@ -51,7 +52,7 @@ timesheetRouter.post('/', (req, res, next) => {
                 } else {
                     db.get(`SELECT * FROM Timesheet where Timesheet.id = ${this.lastID}`, 
                         (err, timesheet) => {
-                            res.status(201).json({timesheet: timesheet});
+                            handleDbError(res, err, timesheet, next, {key: 'timesheet', status: 201});
                         }
                     );
                 }
@@ -71,9 +72,48 @@ timesheetRouter.param('timesheetId', (req, res, next, timesheetId) => {
             req.timesheet = timesheet;
             next();
         } else {
-            res.sendStatus(404);
+            return res.sendStatus(404);
         }
     });
 })
+
+timesheetRouter.put('/:timesheetId', (req, res, next) => {
+    const timesheet = req.body.timesheet;
+    const hours = timesheet.hours;
+    const rate = timesheet.rate;
+    const date = timesheet.date;
+    const employeeId = req.params.employeeId;
+
+    if (!hours || !rate || !date) {
+        return res.sendStatus(400);
+    }
+
+    // req.timesheet was already fetched by the param() middleware
+    // check added to verify relationship between the two ids
+    // query to verify if employee actually exists is redundant with this code
+    if (req.timesheet.employee_id !== Number(employeeId)) {
+        return res.sendStatus(404);
+    }
+
+    const sql = `UPDATE Timesheet SET hours = $hours, rate = $rate, 
+    date = $date WHERE Timesheet.id = $timesheetId`;
+    const values = {
+        $hours: hours,
+        $rate: rate,
+        $date: date,
+        $timesheetId: req.params.timesheetId
+    }
+    db.run(sql, values, function(err) {
+        if (err) {
+            next(err);
+        } else {
+            db.get(`SELECT * FROM Timesheet WHERE Timesheet.id = ${req.params.timesheetId}`,
+                (err, timesheet) => {
+                    handleDbError(res, err, timesheet, next, {key: 'timesheet'}); 
+                }
+            );
+        }
+    });
+});
 
 module.exports = timesheetRouter;
