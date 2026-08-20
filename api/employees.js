@@ -2,6 +2,7 @@ const express = require('express');
 const employeeRouter = express.Router();
 const db = require('./db');
 const handleDbError = require('./handleDbError');
+const timesheetRouter = require('./timesheets');
 
 
 employeeRouter.get('/', (req, res, next) => {
@@ -62,6 +63,8 @@ employeeRouter.param('employeeId', (req, res, next, employeeId) => {
         }
     });
 });
+
+employeeRouter.use('/:employeeId/timesheets', timesheetRouter);
 
 employeeRouter.get('/:employeeId', (req, res, next) => {
     res.status(200).json({employee: req.employee});
