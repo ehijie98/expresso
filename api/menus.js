@@ -31,9 +31,27 @@ menuRouter.post('/', (req, res, next) => {
             db.get(`SELECT * FROM Menu WHERE id = ${this.lastID}`, 
                 (err, menu) => {
                     handleDbError(res, err, menu, next, {key: 'menu', status: 201});
-                })
+                });
         }
-    })
-})
+    });
+});
 
-module.exports = menuRouter
+menuRouter.param('menuId', (req, res, next, menuId) => {
+    const sql = `SELECT * FROM Menu WHERE Menu.id = $menuId`;
+    const values = {menuId: menuId};
+
+    db.get(sql, values, (err, menu) => {
+        if (err) {
+            next(err);
+        } else if (menu) {
+            req.menu = menu;
+            next();
+        } else {
+            res.sendStatus(404);
+        }
+    });
+});
+
+
+
+module.exports = menuRouter;
