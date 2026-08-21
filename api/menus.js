@@ -38,7 +38,7 @@ menuRouter.post('/', (req, res, next) => {
 
 menuRouter.param('menuId', (req, res, next, menuId) => {
     const sql = `SELECT * FROM Menu WHERE Menu.id = $menuId`;
-    const values = {menuId: menuId};
+    const values = {$menuId: menuId};
 
     db.get(sql, values, (err, menu) => {
         if (err) {
@@ -52,6 +52,8 @@ menuRouter.param('menuId', (req, res, next, menuId) => {
     });
 });
 
-
+menuRouter.get('/:menuId', (req, res, next) => {
+    res.status(200).json({menu: req.menu});
+});
 
 module.exports = menuRouter;
