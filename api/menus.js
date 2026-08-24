@@ -2,6 +2,7 @@ const express = require('express');
 const menuRouter = express.Router();
 const db = require('./db');
 const handleDbError = require('./handleDbError');
+const menuItemRouter = require('./menuItem');
 
 menuRouter.get('/', (req, res, next) => {
     db.all(`SELECT * FROM Menu`, (err, menus) => {
@@ -51,6 +52,8 @@ menuRouter.param('menuId', (req, res, next, menuId) => {
         }
     });
 });
+
+menuRouter.use('/:menuId/menu-items', menuItemRouter);
 
 menuRouter.get('/:menuId', (req, res, next) => {
     res.status(200).json({menu: req.menu});
