@@ -5,6 +5,7 @@ db.serialize(() => {
     db.run(`PRAGMA foreign_keys = ON`);
     db.run(`DROP TABLE IF EXISTS Timesheet`);
     db.run(`DROP TABLE IF EXISTS Employee`);
+    db.run(`DROP TABLE IF EXISTS MenuItem`);
     db.run(`DROP TABLE IF EXISTS Menu`);
     db.run(`CREATE TABLE IF NOT EXISTS Employee (
         id INTEGER NOT NULL PRIMARY KEY,
@@ -24,5 +25,14 @@ db.serialize(() => {
     db.run(`CREATE TABLE IF NOT EXISTS Menu (
         id INTEGER NOT NULL PRIMARY KEY,
         title TEXT NOT NULL
-    )`);
+        )`);
+    db.run(`CREATE TABLE IF NOT EXISTS MenuItem (
+        id INTEGER NOT NULL PRIMARY KEY,
+        name TEXT NOT NULL,
+        description TEXT,
+        inventory INTEGER NOT NULL,
+        price INTEGER NOT NULL,
+        menu_id INTEGER NOT NULL,
+        FOREIGN KEY(menu_id) REFERENCES Menu(id)
+        )`);
 });
