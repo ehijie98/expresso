@@ -3,7 +3,7 @@ const handleDbError = (res, err, data, next, options) => {
     if (err) {
         next(err);
     } else if (!data) {
-        res.sendStatus(404);
+        return res.sendStatus(404);
     } else {
         res.status(status).json({[key]: data })
     }

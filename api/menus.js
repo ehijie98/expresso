@@ -2,14 +2,11 @@ const express = require('express');
 const menuRouter = express.Router();
 const db = require('./db');
 const handleDbError = require('./handleDbError');
+const menuItemRouter = require('./menuItem');
 
 menuRouter.get('/', (req, res, next) => {
     db.all(`SELECT * FROM Menu`, (err, menus) => {
-        if (err) {
-            next(err);
-        } else {
-            res.status(200).json({menus: menus});
-        }
+        handleDbError(res, err, menus, next, {key: 'menus', status: 200});
     });
 });
 
@@ -18,7 +15,7 @@ menuRouter.post('/', (req, res, next) => {
     const title = menu.title;
 
     if (!title) {
-        res.sendStatus(400);
+        return res.sendStatus(400);
     };
 
     const sql = `INSERT INTO Menu (title) VALUES ($title)`;
@@ -47,10 +44,12 @@ menuRouter.param('menuId', (req, res, next, menuId) => {
             req.menu = menu;
             next();
         } else {
-            res.sendStatus(404);
+            return res.sendStatus(404);
         }
     });
 });
+
+menuRouter.use('/:menuId/menu-items', menuItemRouter);
 
 menuRouter.get('/:menuId', (req, res, next) => {
     res.status(200).json({menu: req.menu});
@@ -61,7 +60,7 @@ menuRouter.put('/:menuId', (req, res, next) => {
     const title = menu.title;
 
     if (!title) {
-        res.sendStatus(400);
+        return res.sendStatus(400);
     }
 
     const sql = `UPDATE Menu SET title = $title WHERE Menu.id = $menuId`;
@@ -80,7 +79,7 @@ menuRouter.put('/:menuId', (req, res, next) => {
                 }
             );
         }
-    })
-})
+    });
+});
 
 module.exports = menuRouter;
