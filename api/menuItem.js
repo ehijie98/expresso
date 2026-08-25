@@ -110,7 +110,7 @@ menuItemRouter.put('/:menuItemId', (req, res, next) => {
         } else {
             db.get(`SELECT * FROM MenuItem WHERE MenuItem.id = ${req.params.menuItemId}`, 
                 (err, menuItem) => {
-                    res.status(200).json({menuItem: menuItem});
+                    handleDbError(res, err, menuItem, next, {key: 'menuItem'});
                 }
             );
         }
