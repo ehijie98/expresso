@@ -126,7 +126,7 @@ timesheetRouter.delete('/:timesheetId', (req, res, next) => {
         if (err) {
             next(err);
         } else {
-            return res.sendStatus(204);
+            res.sendStatus(204);
         }
     });
 });
