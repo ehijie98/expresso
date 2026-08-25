@@ -78,4 +78,43 @@ menuItemRouter.param('menuItemId', (req, res, next, menuItemId) => {
     });
 });
 
+menuItemRouter.put('/:menuItemId', (req, res, next) => {
+    const menuItem = req.body.menuItem;
+    const name = menuItem.name;
+    const description = menuItem.description;
+    const inventory = menuItem.inventory;
+    const price = menuItem.price;
+    const menuId = req.params.menuId;
+
+    if (!name || !inventory || !price) {
+        return res.sendStatus(400);
+    };
+
+    if (req.menuItem.menu_id !== Number(menuId)) {
+        return res.sendStatus(404);
+    };
+
+    const sql = `UPDATE MenuItem SET name = $name, description = $description, inventory = $inventory, price = $price
+    WHERE MenuItem.id = $menuItemId`;
+    const values = {
+        $name: name,
+        $description: description,
+        $inventory: inventory,
+        $price: price,
+        $menuItemId: req.params.menuItemId
+    };
+
+    db.run(sql, values, function(err) {
+        if (err) {
+            next(err);
+        } else {
+            db.get(`SELECT * FROM MenuItem WHERE MenuItem.id = ${req.params.menuItemId}`, 
+                (err, menuItem) => {
+                    res.status(200).json({menuItem: menuItem});
+                }
+            );
+        }
+    });
+});
+
 module.exports = menuItemRouter;
