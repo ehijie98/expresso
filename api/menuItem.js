@@ -10,11 +10,56 @@ menuItemRouter.get('/', (req, res, next) => {
     };
 
     db.all(sql, values, (err, menuItems) => {
+        handleDbError(res, err, menuItems, next, {key: 'menuItems'});
+    });
+});
+
+menuItemRouter.post('/', (req, res, next) => {
+    const menuItem = req.body.menuItem;
+    const name = menuItem.name;
+    const description = menuItem.description;
+    const inventory = menuItem.inventory;
+    const price = menuItem.price;
+    const menuId = req.params.menuId;
+
+    if (!name || !inventory || !price ) {
+        return res.sendStatus(400);
+    };
+
+    const menuSql = `SELECT * FROM Menu WHERE Menu.id = $menuId`;
+    const menuValues = {$menuId: menuId};
+    
+    db.get(menuSql, menuValues, (err, menu) => {
         if (err) {
             next(err);
         } else {
-            res.status(200).json({menuItems: menuItems});
+            if (!menu) {
+                return res.sendStatus(404);
+            }
+            
+            const sql = `INSERT INTO MenuItem (name, description, inventory, price, menu_id) VALUES 
+            ($name, $description, $inventory, $price, $menuId)`;
+            const values = {
+                $name: name,
+                $description: description,
+                $inventory: inventory,
+                $price: price,
+                $menuId: menuId
+            };
+
+            db.run(sql, values, function(err) {
+                if (err) {
+                    next(err);
+                } else {
+                    db.get(`SELECT * FROM MenuItem WHERE MenuItem.id = ${this.lastID}`, 
+                        (err, menuItem) => {
+                            handleDbError(res, err, menuItem, next, {key: 'menuItem', status: 201});
+                        }
+                    );
+                }
+            });
         }
+        
     });
 });
 

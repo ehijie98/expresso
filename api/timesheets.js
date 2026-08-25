@@ -8,11 +8,7 @@ timesheetRouter.get('/', (req, res, next) => {
    const values = {$employeeId: req.params.employeeId};
 
    db.all(sql, values, (err, timesheets) => {
-    if (err) {
-        next(err);
-    } else {
-        res.status(200).json({timesheets: timesheets});
-    }
+    handleDbError(res, err, timesheets, next, {key: 'timesheets'});
    });
 });
 
@@ -28,7 +24,6 @@ timesheetRouter.post('/', (req, res, next) => {
     if (!hours || !rate || !date) {
         return res.sendStatus(400);
     };
-
 
     db.get(employeeSql, employeeValues, (err, employee) => {
         if (err) {
@@ -121,9 +116,6 @@ timesheetRouter.delete('/:timesheetId', (req, res, next) => {
     const values = {$timesheetId: req.params.timesheetId};
     const employeeId = req.params.employeeId;
 
-    console.log('req.timesheet:', req.timesheet);
-    console.log('employeeId param:', employeeId, typeof employeeId);
-
     // below is a valuable check similar to PUT route to ensure timesheet being deleted belongs to employee in URL
     // has to be discarded to pass tests but worth noting
     // if (req.timesheet.employee_id !== Number(employeeId)) {
@@ -134,7 +126,7 @@ timesheetRouter.delete('/:timesheetId', (req, res, next) => {
         if (err) {
             next(err);
         } else {
-            res.sendStatus(204);
+            return res.sendStatus(204);
         }
     });
 });

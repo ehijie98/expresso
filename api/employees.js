@@ -8,11 +8,7 @@ const timesheetRouter = require('./timesheets');
 employeeRouter.get('/', (req, res, next) => {
     db.all(`SELECT * FROM Employee WHERE Employee.is_current_employee = 1`, 
         (err, employees) => {
-            if (err) {
-                next(err);
-            } else { 
-                res.status(200).json({employees: employees});
-            }
+            handleDbError(res, err, employees, next, {key: 'employees', status: 201});
         });
 });
 
@@ -42,7 +38,7 @@ employeeRouter.post('/', (req, res, next) => {
         } else {
             db.get(`SELECT * FROM Employee WHERE id = ${this.lastID}`,
                 (err, employee) => {
-                    handleDbError(res, err, employee, next, {key: 'employee', status: 201});
+                    handleDbError(res, err, employee, next, {key: 'employee', status: 200});
                 }
             );
         }
@@ -59,7 +55,7 @@ employeeRouter.param('employeeId', (req, res, next, employeeId) => {
             req.employee = employee;
             next();
         } else {
-            res.sendStatus(404);
+            return res.sendStatus(404);
         }
     });
 });
