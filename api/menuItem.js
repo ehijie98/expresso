@@ -59,7 +59,22 @@ menuItemRouter.post('/', (req, res, next) => {
                 }
             });
         }
-        
+    });
+});
+
+menuItemRouter.param('menuItemId', (req, res, next, menuItemId) => {
+    const sql = `SELECT * FROM MenuItem WHERE MenuItem.id = $menuItemId`;
+    const values = {$menuItemId: menuItemId};
+
+    db.get(sql, values, (err, menuItem) => {
+        if (err) {
+            next(err);
+        } else if (menuItem) {
+            req.menuItem = menuItem;
+            next();
+        } else {
+            return res.sendStatus(404);
+        }
     });
 });
 

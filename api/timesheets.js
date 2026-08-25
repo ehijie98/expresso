@@ -70,7 +70,7 @@ timesheetRouter.param('timesheetId', (req, res, next, timesheetId) => {
             return res.sendStatus(404);
         }
     });
-})
+});
 
 timesheetRouter.put('/:timesheetId', (req, res, next) => {
     const timesheet = req.body.timesheet;
