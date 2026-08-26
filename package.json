@@ -4,7 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha",
+    "seed": "node migration.js && node seed.js",
+    "start": "npm run seed && node server.js"
   },
   "author": "",
   "license": "ISC",
