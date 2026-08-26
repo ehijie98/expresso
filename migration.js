@@ -3,6 +3,10 @@ const db = require('./api/db');
 
 db.serialize(() => {
     db.run(`PRAGMA foreign_keys = ON`);
+    db.run(`DROP TABLE IF EXISTS Timesheet`);
+    db.run(`DROP TABLE IF EXISTS Employee`);
+    db.run(`DROP TABLE IF EXISTS MenuItem`);
+    db.run(`DROP TABLE IF EXISTS Menu`);
     db.run(`CREATE TABLE IF NOT EXISTS Employee (
         id INTEGER NOT NULL PRIMARY KEY,
         name TEXT NOT NULL,
