@@ -4,6 +4,7 @@ const errorHandler = require('errorhandler');
 const express = require('express');
 const morgan = require('morgan');
 const apiRouter = require('./api/api');
+const path = require('path');
 
 const app = express();
 
